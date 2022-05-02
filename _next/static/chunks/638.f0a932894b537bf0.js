@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[638],{36638:function(e,n,c){c.r(n),c.d(n,{default:function(){return u}});var s=c(52322),r=c(73456),t=c(69078);function u(){return(0,s.jsx)(r.b,{animation:"bouncy",elevation:"$4",size:110,bc:"$background",br:"$9",hoverStyle:{scale:1.2},pressStyle:{scale:.9},children:(0,s.jsx)(t.K7,{downscale:.75})})}}}]);
