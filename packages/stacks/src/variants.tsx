@@ -2,7 +2,8 @@ import { getElevation } from './Stacks'
 
 export const elevate = {
   true: (_, extras) => {
-    return getElevation(extras.props['size'], extras)
+    const sizeProp = extras.props['size'] ?? '$4'
+    return getElevation(sizeProp, extras)
   },
 }
 

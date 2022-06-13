@@ -40,8 +40,7 @@ type DialogContextValue = {
   onOpenChange(open: boolean): void
   onOpenToggle(): void
   modal: boolean
-  allowPinchZoom: boolean
-  // allowPinchZoom: DialogProps['allowPinchZoom'];
+  allowPinchZoom: RemoveScrollProps['allowPinchZoom']
 }
 
 const [DialogProvider, useDialogContext] = createDialogContext<DialogContextValue>(DIALOG_NAME)

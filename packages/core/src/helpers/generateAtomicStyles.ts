@@ -297,10 +297,15 @@ const colorProps = {
 }
 
 function normalizeValueWithProperty(value: any, property?: string): any {
+  const isNumber = typeof value === 'number'
+  if (process.env.NODE_ENV === 'development') {
+    if (isNumber && isNaN(value)) {
+      console.warn('NaN value caught', value, property)
+    }
+  }
   if (process.env.TAMAGUI_TARGET === 'web') {
     const shouldCoerceToPx =
-      typeof value === 'number' &&
-      (property === undefined || property === null || !unitlessNumbers[property])
+      isNumber && (property === undefined || property === null || !unitlessNumbers[property])
     if (shouldCoerceToPx) {
       return `${value}px`
     }
@@ -412,6 +417,7 @@ const resolveShadowValue = (style: ViewStyle): void | string => {
   const offsetY = normalizeValueWithProperty(height)
   const blurRadius = normalizeValueWithProperty(shadowRadius || 0)
   const color = normalizeColor(String(shadowColor || 'black'), shadowOpacity)
+  console.log('ok', `${offsetX} ${offsetY} ${blurRadius} ${color}`)
   return `${offsetX} ${offsetY} ${blurRadius} ${color}`
 }
 

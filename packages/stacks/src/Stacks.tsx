@@ -15,6 +15,9 @@ export type XStackProps = YStackProps
 export type ZStackProps = YStackProps
 
 export const getElevation: SizeVariantSpreadFunction<StackProps> = (size, extras) => {
+  if (!size) {
+    return {}
+  }
   const { tokens } = extras
   const token = tokens.size[size]
   const sizeNum = (isVariable(token) ? +token.val : size) as number

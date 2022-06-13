@@ -1,0 +1,48 @@
+{
+  "name": "@tamagui/radio-group",
+  "version": "1.0.1-beta.63",
+  "sideEffects": true,
+  "source": "src/index.ts",
+  "types": "./types/index.d.ts",
+  "main": "dist/cjs",
+  "module": "dist/esm",
+  "module:jsx": "dist/jsx",
+  "files": [
+    "src",
+    "types",
+    "dist"
+  ],
+  "scripts": {
+    "build": "tamagui-build",
+    "watch": "tamagui-build --watch",
+    "clean": "tamagui-build clean",
+    "clean:build": "tamagui-build clean:build"
+  },
+  "dependencies": {
+    "@radix-ui/react-direction": "^0.1.0-rc.1",
+    "@tamagui/compose-refs": "^1.0.1-beta.63",
+    "@tamagui/label": "^1.0.1-beta.63",
+    "@tamagui/core": "^1.0.1-beta.63",
+    "@tamagui/create-context": "^1.0.1-beta.63",
+    "@tamagui/list-item": "^1.0.1-beta.63",
+    "@tamagui/separator": "^1.0.1-beta.63",
+    "@tamagui/stacks": "^1.0.1-beta.63",
+    "@tamagui/text": "^1.0.1-beta.63",
+    "@tamagui/use-controllable-state": "^1.0.1-beta.63"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-dom": "*",
+    "react-native": "*"
+  },
+  "devDependencies": {
+    "@tamagui/build": "^1.0.1-beta.63",
+    "@types/react-native": "^0.67.3",
+    "react": "*",
+    "react-dom": "*",
+    "react-native": "*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

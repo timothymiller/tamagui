@@ -145,7 +145,7 @@ const themeCreator = (
     colorFocus: get(colors, 3 + str, 'color'),
     colorTranslucent,
     colorMid: (isLight ? colors : backgrounds)[Math.floor(colors.length / 2)],
-    shadowColor: isLight ? color.grayA2Light : color.grayA8Light,
+    shadowColor: isLight ? color.grayA4Light : color.grayA8Light,
     shadowColorHover: darkColors[!isLight ? 1 : 8],
     shadowColorPress: darkColors[!isLight ? 1 : 8],
     shadowColorFocus: darkColors[!isLight ? 1 : 8],
@@ -219,8 +219,10 @@ const lightThemes = createThemesFrom('light', themeCreator, {
   backgrounds: themeColors.light,
   // isBase: true,
   backgroundStrong: '#f2f2f2', // matches iOS
-  borderColors: themeColors.light.slice(2),
   isLight: true,
+  offsets: {
+    borderColor: [5, 4, 3, 2, 1],
+  },
 })
 
 const darkThemes = createThemesFrom('dark', themeCreator, {

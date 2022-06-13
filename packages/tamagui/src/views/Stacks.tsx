@@ -91,5 +91,6 @@ export const getSizedElevation = (
     shadowRadius,
     shadowOffset: { height, width: 0 },
   }
+  console.log('shadow', shadow)
   return shadow
 }

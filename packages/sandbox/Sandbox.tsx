@@ -2,12 +2,17 @@
 import '@tamagui/core/reset.css'
 import '@tamagui/polyfill-dev'
 
-import { Tamagui as TT } from '@tamagui/core'
-import { ChevronRight, Cloud, Moon, Star, Sun } from '@tamagui/feather-icons'
+import { Tamagui as TT, Unspaced } from '@tamagui/core'
+import { Drawer } from '@tamagui/drawer'
+//         <Select.ScrollDownButton>👇</Select.ScrollDownButton>
+//       </Select.Content>
+//     </Select>
+//   )
+// }
+import { ChevronDown, ChevronUp, X } from '@tamagui/feather-icons'
 import React, { useState } from 'react'
 import { useColorScheme } from 'react-native'
-import { Group, XStack } from 'tamagui'
-import { ListItem, Separator } from 'tamagui'
+import { Button, Dialog, Fieldset, Input, Label, Paragraph, YStack } from 'tamagui'
 
 import Tamagui from './tamagui.config'
 
@@ -42,21 +47,7 @@ export const Sandbox = () => {
           justifyContent: 'center',
         }}
       >
-        <XStack
-          borderWidth={1}
-          borderColor="$borderColor"
-          px="$7"
-          pl="$6"
-          height={48}
-          ai="center"
-          als="center"
-          elevation="$2"
-          br="$10"
-          bc="$background"
-          hoverStyle={{
-            bc: '$background',
-          }}
-        />
+        <DrawerDemo />
       </div>
     </Tamagui.Provider>
   )
@@ -102,8 +93,64 @@ export const Sandbox = () => {
 //           </Select.Group>
 //         </Select.Viewport>
 
-//         <Select.ScrollDownButton>👇</Select.ScrollDownButton>
-//       </Select.Content>
-//     </Select>
-//   )
-// }
+export default function DrawerDemo() {
+  const [show, setShow] = useState(false)
+  return (
+    <Drawer modal>
+      <Drawer.Trigger asChild>
+        <Button>Edit Profile</Button>
+      </Drawer.Trigger>
+      <Drawer.Portal>
+        <Drawer.Overlay key="overlay" o={0.5} />
+        <Drawer.Content
+          key="content"
+          space
+          animation={[
+            'quick',
+            {
+              opacity: {
+                overshootClamping: true,
+              },
+            },
+          ]}
+          enterStyle={{ x: 0, y: -40, opacity: 0 }}
+          exitStyle={{ x: 0, y: 40, opacity: 0 }}
+          x={0}
+          opacity={1}
+          y={0}
+        >
+          <Drawer.Title>Edit profile</Drawer.Title>
+          <Drawer.Description>
+            Make changes to your profile here. Click save when you're done.
+          </Drawer.Description>
+          <Fieldset horizontal>
+            <Label w={160} justifyContent="flex-end" htmlFor="name">
+              Name
+            </Label>
+            <Input f={1} id="name" defaultValue="Nate Wienert" />
+          </Fieldset>
+          <Fieldset horizontal>
+            <Label w={160} justifyContent="flex-end" htmlFor="username">
+              Username
+            </Label>
+            <Input f={1} id="username" defaultValue="@natebirdman" />
+          </Fieldset>
+
+          <YStack ai="flex-end" mt="$2">
+            <Drawer.Close asChild>
+              <Button theme="alt1" aria-label="Close">
+                Save changes
+              </Button>
+            </Drawer.Close>
+          </YStack>
+
+          <Unspaced>
+            <Drawer.Close asChild>
+              <Button pos="absolute" t="$4" r="$4" circular icon={X} />
+            </Drawer.Close>
+          </Unspaced>
+        </Drawer.Content>
+      </Drawer.Portal>
+    </Drawer>
+  )
+}
