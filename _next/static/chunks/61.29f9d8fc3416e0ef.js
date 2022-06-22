@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunk_N_E=self.webpackChunk_N_E||[]).push([[61],{1061:function(e,n,s){s.r(n),s.d(n,{default:function(){return t}});var c=s(52322),a=s(91978),l=s(16653),t=()=>(0,c.jsx)(a.b,{bc:"$pink10",animation:"bouncy",elevation:"$4",size:110,br:"$9",hoverStyle:{scale:1.2},pressStyle:{scale:.9},children:(0,c.jsx)(l.K7,{downscale:.75})})}}]);
