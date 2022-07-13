@@ -1,4 +1,4 @@
-import { configListeners, getHasConfigured, setConfig } from './conf'
+import { configListeners, setConfig } from './conf'
 import { THEME_CLASSNAME_PREFIX } from './constants/constants'
 import { isWeb } from './constants/platform'
 import { SpacerProps } from './createComponent'
@@ -18,7 +18,6 @@ import { parseFont, registerFontVariables } from './insertFont'
 import { Tamagui } from './Tamagui'
 import {
   AnimationDriver,
-  CreateTamaguiConfig,
   GenericTamaguiConfig,
   MediaQueryKey,
   StackProps,
@@ -27,53 +26,58 @@ import {
   ThemeObject,
 } from './types'
 
-export type CreateTamaguiProps =
-  // user then re-defines the types after createTamagui returns the typed object they want
-  Partial<Omit<GenericTamaguiConfig, 'themes' | 'tokens' | 'animations' | 'fonts'>> & {
-    animations?: AnimationDriver<any>
-    fonts: GenericTamaguiConfig['fonts']
-    tokens: GenericTamaguiConfig['tokens']
-    themes: {
-      [key: string]: {
-        [key: string]: string | number | Variable
-      }
+export type CreateTamaguiProps = {
+  shorthands?: GenericTamaguiConfig['shorthands']
+  media?: GenericTamaguiConfig['media']
+  animations?: AnimationDriver<any>
+  fonts: GenericTamaguiConfig['fonts']
+  tokens: GenericTamaguiConfig['tokens']
+  themes: {
+    [key: string]: {
+      [key: string]: string | number | Variable
     }
-
-    defaultProps?: Record<string, any> & {
-      Stack?: StackProps
-      Text?: TextProps
-      Spacer?: SpacerProps
-    }
-
-    // for the first render, determines which media queries are true
-    // useful for SSR
-    mediaQueryDefaultActive?: MediaQueryKey[]
-
-    // what's between each CSS style rule, set to "\n" to be easier to read
-    // defaults: "\n" when NODE_ENV=development, "" otherwise
-    cssStyleSeparator?: string
-
-    // (Advanced)
-    // on the web, tamagui treats `dark` and `light` themes as special and
-    // generates extra CSS to avoid having to re-render the entire page.
-    // this CSS relies on specificity hacks that multiply by your sub-themes.
-    // this sets the maxiumum number of nested dark/light themes you can do
-    // defaults to 3 for a balance, but can be higher if you nest them deeply.
-    maxDarkLightNesting?: number
-
-    // adds @media(prefers-color-scheme) media queries for dark/light
-    shouldAddPrefersColorThemes?: boolean
-
-    // only if you put the theme classname on the html element we have to generate diff
-    themeClassNameOnRoot?: boolean
   }
+
+  defaultProps?: Record<string, any> & {
+    Stack?: StackProps
+    Text?: TextProps
+    Spacer?: SpacerProps
+  }
+
+  // for the first render, determines which media queries are true
+  // useful for SSR
+  mediaQueryDefaultActive?: MediaQueryKey[]
+
+  // what's between each CSS style rule, set to "\n" to be easier to read
+  // defaults: "\n" when NODE_ENV=development, "" otherwise
+  cssStyleSeparator?: string
+
+  // (Advanced)
+  // on the web, tamagui treats `dark` and `light` themes as special and
+  // generates extra CSS to avoid having to re-render the entire page.
+  // this CSS relies on specificity hacks that multiply by your sub-themes.
+  // this sets the maxiumum number of nested dark/light themes you can do
+  // defaults to 3 for a balance, but can be higher if you nest them deeply.
+  maxDarkLightNesting?: number
+
+  // adds @media(prefers-color-scheme) media queries for dark/light
+  shouldAddPrefersColorThemes?: boolean
+
+  // only if you put the theme classname on the html element we have to generate diff
+  themeClassNameOnRoot?: boolean
+}
 
 // config is re-run by the @tamagui/static, dont double validate
 const createdConfigs = new WeakMap<any, boolean>()
 
-export type InferTamaguiConfig<Conf extends CreateTamaguiProps> = Conf extends Partial<
-  CreateTamaguiConfig<infer A, infer B, infer C, infer D, infer E, infer F>
->
+export type InferTamaguiConfig<Conf> = Conf extends {
+  fonts: infer F
+  tokens: infer A
+  themes: infer B
+  shorthands?: infer C
+  media?: infer D
+  animations?: AnimationDriver<infer E>
+}
   ? TamaguiInternalConfig<A, B, C, D, E, F>
   : unknown
 
@@ -383,12 +387,17 @@ function ensureThemeVariable(theme: any, key: string) {
 }
 
 // for quick testing types:
-// const x = createTamagui({
+// const conf = createTamagui({
+//   fonts: {
+//     body: createFont({}),
+//     body_cn: createFont({}),
+//   },
 //   shorthands: {},
-//   media: {},
+//   media: {
+//     xs: {}
+//   },
 //   themes: {},
 //   tokens: {
-//     font: {},
 //     color: {},
 //     radius: {},
 //     size: {},
@@ -396,3 +405,7 @@ function ensureThemeVariable(theme: any, key: string) {
 //     zIndex: {},
 //   },
 // })
+
+// type Conf = typeof conf
+// type Fonts = Conf['fonts']
+// type Medias = Conf['media']

@@ -122,9 +122,7 @@ type GenericMedia<K extends string = string> = {
   }
 }
 
-export type GenericFonts = {
-  [key: string]: GenericFont
-}
+export type GenericFonts = Record<string, GenericFont>
 
 type GenericAnimations = {
   [key: string]:
@@ -157,15 +155,39 @@ export type CreateTamaguiConfig<
   D extends GenericMedia = GenericMedia,
   E extends GenericAnimations = GenericAnimations,
   F extends GenericFonts = GenericFonts
-> = Partial<Pick<ThemeProviderProps, 'defaultTheme' | 'disableRootThemeClass'>> & {
-  fonts: F
+> = {
+  fonts: RemoveLanguagePostfixes<F>
+  fontLanguages: GetLanguagePostfixes<F>
   tokens: A
   themes: B
   shorthands: C
   media: D
   animations: AnimationDriver<E>
-  defaultProps?: Record<string, Object>
 }
+
+type GetLanguagePostfix<Set> = Set extends string
+  ? Set extends `${string}_${infer Postfix}`
+    ? Postfix
+    : never
+  : never
+
+type OmitLanguagePostfix<Set> = Set extends string
+  ? Set extends `${infer Prefix}_${string}`
+    ? Prefix
+    : Set
+  : never
+
+type RemoveLanguagePostfixes<F extends GenericFonts> = {
+  [Key in OmitLanguagePostfix<keyof F>]: F[Key]
+}
+
+type GetLanguagePostfixes<F extends GenericFonts> = GetLanguagePostfix<F>
+
+// test RemoveLanguagePostfixes
+// type x = CreateTamaguiConfig<any, any, any, any, any, {
+//   body: any,
+//   body_en: any
+// }>['fonts']
 
 // for use in creation functions so it doesnt get overwrtitten
 export type GenericTamaguiConfig = CreateTamaguiConfig<
@@ -184,21 +206,23 @@ export type Shorthands = TamaguiConfig['shorthands']
 export type Media = TamaguiConfig['media']
 export type Themes = TamaguiConfig['themes']
 export type ThemeName = GetAltThemeNames<keyof Themes>
-// export type ThemeNameWithSubThemes = GetSubThemes<ThemeName>
 export type ThemeKeys = keyof ThemeObject
 export type ThemeTokens = `$${ThemeKeys}`
 export type AnimationKeys = Omit<GetAnimationKeys<TamaguiConfig>, number>
+export type FontLanguages = TamaguiConfig['fontLanguages'] extends never
+  ? string
+  : GetLanguagePostfixes<TamaguiConfig['fontLanguages']>
 
 type GetAltThemeNames<S> = (S extends `${string}_${infer Alt}` ? GetAltThemeNames<Alt> : S) | S
 
 // this is the config generated via createTamagui()
 export type TamaguiInternalConfig<
-  A extends GenericTokens = GenericTokens,
-  B extends GenericThemes = GenericThemes,
-  C extends GenericShorthands = GenericShorthands,
-  D extends GenericMedia = GenericMedia,
-  E extends GenericAnimations = GenericAnimations,
-  F extends GenericFonts = GenericFonts
+  A = GenericTokens,
+  B = GenericThemes,
+  C = GenericShorthands,
+  D = GenericMedia,
+  E = GenericAnimations,
+  F = GenericFonts
 > = CreateTamaguiConfig<A, B, C, D, E, F> & {
   // TODO need to make it this but this breaks types, revisit
   // animations: E //AnimationDriver<E>
