@@ -1,4 +1,9 @@
-packages/site/pages/studio/** filter=git-crypt diff=git-crypt
-packages/site/pages/takeout/** filter=git-crypt diff=git-crypt
-takeout/** filter=git-crypt diff=git-crypt
-takeout-apps/** filter=git-crypt diff=git-crypt
+code/docs/app/** filter=crypt diff=crypt merge=crypt
+code/docs/data/** filter=crypt diff=crypt merge=crypt
+code/bento/src/** filter=crypt diff=crypt merge=crypt
+code/takeout/app/** filter=crypt-takeout diff=crypt-takeout merge=crypt-takeout
+code/takeout/features/** filter=crypt-takeout diff=crypt-takeout merge=crypt-takeout
+code/takeout/ui/** filter=crypt-takeout diff=crypt-takeout merge=crypt-takeout
+code/takeout/hooks/** filter=crypt-takeout diff=crypt-takeout merge=crypt-takeout
+code/takeout/helpers/** filter=crypt-takeout diff=crypt-takeout merge=crypt-takeout
+

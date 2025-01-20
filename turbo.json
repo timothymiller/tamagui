@@ -1,30 +1,68 @@
 {
-  "baseBranch": "origin/master",
-  "pipeline": {
+  "$schema": "https://turbo.build/schema.json",
+  "extends": [
+    "//"
+  ],
+  "tasks": {
+    "build:js": {
+      "cache": false,
+      "inputs": [
+        "package.json",
+        "src/**",
+        "tamagui-build.js"
+      ],
+      "outputs": [
+        "dist/**"
+      ]
+    },
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "dist/**", "lib/**", "types/**"]
+      "dependsOn": [
+        "^build"
+      ],
+      "inputs": [
+        "tsconfig.json",
+        "package.json",
+        "src/**",
+        "tamagui-build.js",
+        "externalNodePlugin.js"
+      ],
+      "outputs": [
+        ".next/**",
+        "dist/**",
+        "types/**"
+      ]
     },
     "start": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build"
+      ],
       "outputs": []
     },
     "test": {
-      "dependsOn": ["^build"],
-      "outputs": []
-    },
-    "test-update": {
-      "dependsOn": ["^build"],
+      "dependsOn": [
+        "^build:js"
+      ],
       "outputs": []
     },
     "clean": {
-      "outputs": []
+      "outputs": [
+        "dist/**"
+      ],
+      "cache": false
     },
     "clean:build": {
-      "outputs": []
+      "outputs": [],
+      "cache": false
     },
     "lint": {
+      "cache": false,
       "outputs": []
+    },
+    "lint:fix": {
+      "cache": false,
+      "outputs": [
+        "src/**"
+      ]
     },
     "dev": {
       "cache": false

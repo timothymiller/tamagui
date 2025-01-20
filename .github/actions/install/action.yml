@@ -1,13 +1,18 @@
 name: 'Install'
 description: 'Install and pre-build'
+inputs:
+  transcrypt_password:
+    description: 'Key to unlock repo'
+    required: true
 
 runs:
   using: composite
   steps:
-    - name: Setup Node.js 16.x
-      uses: actions/setup-node@master
+    - name: Setup Node.js 22.x
+      uses: actions/setup-node@v4
       with:
-        node-version: 16.x
+        node-version: 22.4
+        registry-url: 'https://registry.npmjs.org'
 
     - name: install yarn
       shell: bash
@@ -15,7 +20,11 @@ runs:
 
     - name: Install Dependencies
       shell: bash
-      run: ./scripts/ci-prepare.sh && YARN_ENABLE_IMMUTABLE_INSTALLS=false yarn install
+      run: yarn install
+      env:
+        # postinstall uses this
+        TRANSCRYPT_PASSWORD: ${{ inputs.transcrypt_password }}
+        SHOULD_UNLOCK_GIT_CRYPT: "1"
 
     - name: Build JS
       shell: bash

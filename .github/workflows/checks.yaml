@@ -1,46 +1,51 @@
 name: Checks
 
 on:
+  pull_request:
   push:
     paths-ignore:
       - 'assets/**'
       - '.vscode/**'
-    branches-ignore:
+    branches:
       - master
 
 jobs:
-  check:
+  checks:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v4
+
       - name: Install
         uses: ./.github/actions/install
+        with:
+          transcrypt_password: ${{ secrets.transcrypt_password }}
+
       - name: Check
-        run: yarn check
+        run: yarn && yarn check
 
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Install
-        uses: ./.github/actions/install
-      - name: Test
-        run: yarn test
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Install
-        uses: ./.github/actions/install
       - name: Lint
         run: yarn lint
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install
+        uses: ./.github/actions/install
+        with:
+          transcrypt_password: ${{ secrets.transcrypt_password }}
+
+      - name: Install playwright
+        run: npx playwright install
+
+      - uses: nick-fields/retry@v3
+        name: "Run tests"
+        env:
+          YARN_ENABLE_IMMUTABLE_INSTALLS: false
+        with:
+          timeout_minutes: 15
+          max_attempts: 2
+          command: 'yarn test'

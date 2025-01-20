@@ -3,11 +3,13 @@
   "compilerOptions": {
     "typeRoots": ["node_modules/@types"],
     "skipDefaultLibCheck": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noEmit": true
   },
   "references": [
-    { "path": "packages/site" },
-    { "path": "packages/sandbox" },
-    { "path": "packages/kitchen-sink" },
+    { "path": "code/kitchen-sink" },
+    { "path": "code/bento" },
+    { "path": "code/demos" },
+    { "path": "code/tamagui.dev" },
   ]
 }

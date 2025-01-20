@@ -1,86 +1,56 @@
-<h1 align="center">
-  <img margin="auto" width="612px" src="https://github.com/tamagui/tamagui/raw/master/packages/site/public/social.jpg" alt="Tamagui">
-  <br>
-</h1>
+<div align="center">
+  <picture width="572px">
+    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/tamagui/tamagui/raw/master/code/tamagui.dev/public/logo-black.png">
+    <source media="(prefers-color-scheme: light)" srcset="https://github.com/tamagui/tamagui/raw/master/code/tamagui.dev/public/logo-white.png">
+    <img alt="Shows a black logo in light color mode and a white one in dark color mode." src="https://github.com/tamagui/tamagui/raw/master/code/tamagui.dev/public/logo-words.png">
+  </picture>
+</div>
 
-<h4 align="center">The faster, more complete style system for React Native & Web.</h4>
+<h3 align="center">
+  Style library, design system, composable components, and more.
+</h3>
 
-See [tamagui.dev](https://tamagui.dev) for documentation.
+<h4 align="center">
+  Tamagui is a bunch of libraries for building UIs that share code across React and React Native.
+</h4>
 
----
+<br />
 
-Tamagui lets you **share more code between web and native apps while improving, rather than sacrificing, DX, performance, and code maintainability**.
+<div align="center">
+  <img alt="NPM downloads" src="https://img.shields.io/npm/dw/@tamagui/core?logo=npm&label=NPM%20downloads&cacheSeconds=3600"/>
+  <img alt="Discord users online" src="https://img.shields.io/github/commit-activity/m/tamagui/tamagui?label=Commits&logo=git" />
+  <img alt="Commits per month" src="https://img.shields.io/discord/909986013848412191?logo=discord&label=Discord&cacheSeconds=3600" />
+  <a href="https://gurubase.io/g/tamagui">
+    <img alt="Gurubase" src="https://img.shields.io/badge/Gurubase-Ask%20Tamagui%20Guru-006BFF" />
+  </a>
+</div>
 
-It does this by compiling typed inline styles - even ones containing conditional logic, themes, or responsivity - into efficient atomic CSS (or a hoisted StyleSheet on native).
+<br />
+<br />
 
-This is a **win-win-win**: more performant, easier to write/maintain, and works on every platform. Typically you'd have to trade performance for DX, or both for cross-platform compatibility. With Tamagui, you don't!
+- `@tamagui/core` - Universal style library for React.
+- `@tamagui/static` - Optimizing compiler that works with `core` and `tamagui`.
+- `tamagui` - UI kit that adapts to every platform.
 
-In exchange you add some complexity with the compiler - but - it's both optional and very easy to granularly introspect or turn off.
+<br />
 
-The compiler does a lot, too - it analyzes logic, spreads, and nested ternaries, even flattening fully analyzable components to reduce tree depth signficantly.
+**See [tamagui.dev](https://tamagui.dev) for documentation.**
 
-[Read more on the website](https://tamagui.dev/docs/intro/introduction).
+Tamagui lets you share more code between web and native apps without sacrificing the two things that typically suffer when you do: performance and code quality.
 
----
+It does this with an optimizing compiler that outputs platform-specific optimizations - it turns styled components, even with complex logic or cross-module imports, into a simple `div` alongside atomic CSS on the web, or a View with its style objects hoisted on native.
+
+The entirety of Tamagui works at compile time and runtime, and can be set up gradually, with initial usage as simple as importing it and using the base views and styled function.
+
+We recommend checking out the starters with `npm create tamagui@latest`, they range from a simple learning example to a production-ready monorepo.
+
+The compiler optimizes most and ultimately flattens a majority of styled components. In the [~500px² responsive browser section](https://tamagui.dev) of the Tamagui website, 49 of the 55 or so [inline styled components](https://github.com/tamagui/tamagui/blob/master/code/tamagui.dev/components/HeroResponsive.tsx) are flattened to a `div`. The homepage gains nearly 15% on Lighthouse with the compiler on.
+
+[Learn more on the website](https://tamagui.dev/docs/intro/introduction).
+
 
 ## Contributing
 
-Tamagui is a monorepo that makes it easy to contribute.
+To contribute to Tamagui reference the [contributing guide](https://github.com/tamagui/tamagui/blob/master/CONTRIBUTING.md).
 
-As of now Tamagui has some encrypted files relating to upcoming features that you'll need to remove before install:
-
-```
-./script/ci-prepare.sh
-```
-
-Then install:
-
-```
-yarn
-```
-
-While developing, you'll want to run the build watcher in a dedicated terminal:
-
-```
-yarn watch
-```
-
-It's easiest to use the `sandbox` project to test and develop things for web:
-
-```
-yarn sandbox
-```
-
-This runs a client-side only vite build of tamagui, with a complete configuration already set up.
-
-To test on native, `kitchen-sink` is equally light weight and well set up:
-
-```
-yarn kitchen-sink
-```
-
-Once you've made changes, you can add tests. All compiler and CSS generation tests live in `packages/static`.
-
-Before submitting a PR, check everything works across every combination of environments.
-
-To do so, run the site, first in development to test if it works entirely at runtime:
-
-```
-yarn site
-```
-
-You replace _app.tsx to return just your component/use case. If it looks good, try running again with the compiler on:
-
-```
-yarn site:extract
-```
-
-Finally, if that looks good, build to production and test that:
-
-```
-yarn site:prod
-```
-
-This flow ensures it works with Vite, Webpack, Metro, Next.js with SSR, and with the compiler both on and off.
-
-Our plan is to add integration tests to cover all this and more soon!
+To contribute to documentation reference the [writing guide](https://github.com/tamagui/tamagui/blob/master/code/tamagui.dev/WRITING-GUIDE.md).

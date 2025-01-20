@@ -1,254 +1,551 @@
-- 1.0
+v4 config:
 
+- add new doc page just for it
+  - document createThemes there simply
+  - document shorthands etc
+  - document simple themes setup
 
-font language support:
+2.0:
+  - remove themeBuilder from plugins in favor of just using ENV to tree shake
+  - remove all theme css scanning stuff to separate optional package
+  - remove componentName, just allow setting default theme: ""
+  - remove builders like themebuilder etc from config
+    - do it via plugins automatically
+  - remove inlineProps, usedKeys, partial extraction
 
-```
-const enBody = createFont(...)
-const cnBody = createFont(...)
+  - must pass in colors separately but it exports the defaults still
+  - createSystemFont into package
+  - v4 themes
+    - based on studio, allows passing in custom colors
+  - remove component themes by default instead just do:
+    - "surface1-3" and have components use that instead of name by default when not unstyled
 
-createTamagui({
-  fonts: {
-    body_en:
-    body_cn:
+- v3
+  - tokens => variables (remove nested groups)
+  - theme => variables
+  - shorthands can also take values:
+  - {
+    block: { display: 'block' },
+    'inline-block': { display: 'inline-block' },
   }
+
+
+is this a bug? the is_static conditional is odd, maybe backward
+- if (shouldRetain || !(process.env.IS_STATIC === 'is_static')) {
+
+---
+
+v3
+
+remove component themes:
+ - just can set theme="surface2" and have "generic" themes
+ - remove `name` from styled() then too
+
+generic function to allow new syntaxes, eg flat mode
+
+```tsx
+<Stack width={[100, 200]} />
+<Stack width={{ web: 50, native: 200, group-sm: 200 }} />
+<Stack width="web:100, group-med:10px" />?
+```
+
+  - removes all nested object style props instead you always use the value
+ - `core-nested`, `core-flat`, `core-tailwind`:
+
+```tsx
+createCore<CustomTypes>({
+  propMapper(propsIn) { return propsOut }
+})
+```
+
+  - `background` prop + linear-gradient + background-image (see *Skeleton)
+  - can we remove the need for separate Text/View?
+      - seems like we could scan just the direct descendents?
+      https://github.com/facebook/react-strict-dom/blob/429e2fe1cb9370c59378d9ba1f4a40676bef7555/packages/react-strict-dom/src/native/modules/createStrictDOMComponent.js#L529
+  - light-dark()
+    - this is an official css thing so would be easy-ish to implement
+  - run over components and review for removing some assumptions about `size`
+  - disableInjectCSS should maybe just be automated better or defaulted on
+  - flat vs style mode, style moves all tamagui styles into `style` besides the other psuedos like hover, enter, etc
+  - no react-native deps across the ui kit on web
+  - html.div, styled('div'), styled(html.div)
+  - zero runtime mode
+    - all functional styles pre-generate the styles across the possible tokens (if :number it uses SizeTokens, probably have to disallow string and '...' types but could have a way to define the values at build-time)
+  - `<Theme values={{}} />` dynamic override
+
+- perf getState could be cached (weakmap themeManager + stringify props)
+
+- isolatedDeclarations for build perf // TODO: turn on
+
+- beef up tests:
+  - native
+  - native/web performance
+  - nextjs (can add to code/next-site), esp light/dark/animations
+  - $group $platform $theme styling
+
+- reanimated animate presence is making me set `opacity: 1` type default values
+
+- Sheet.overlay is memoized incorrectly props dont update it
+
+- popover trigger should send an event to close tooltips automatically on open
+  - closeTooltips() helper
+  - tooltip prop `closeOnGlobalPress`
+
+- we should add a docs page on testing tamagui:
+
+jest-preset.js should add (for testing native):
+
+testEnvironmentOptions: {
+  customExportConditions: ['react-native'],
+}
+
+- looks like our upgrade to 1.114 added virtualkeyboardpolicy="manual" which broke the auto keyboard appearance on android web, working on a quick fix but wanted to flag
+
+- deeply nested themeInverse needs a fix see kitchen sink squares
+- nan issue: nan start or end NaN 22 bytes: 0-22 [ 'bytes: 0', '22' ]
+
+- button media queries break due to useStyle hook
+- algolia creds
+- can skip a ton of CSS by disabling prefers color theme setting
+  - so long as they use next-theme, or vxrn/color-scheme
+
+- uniswap/tamagui fixes, see uniswap section
+  - the platform-web type issues should be relatively easy
+  - fix customization https://discord.com/channels/909986013848412191/1206456825583632384/1274853294195605525
+
+
+uniswap:
+
+- enter/exit in media not overriding
+
+- Checkbox disabled prop not disabling on native
+
+- if Popover can not be portaled that would be useful for some use cases
+
+- RadioGroup.Indicator can't use AnimatePresence i think because .styleable()
+  - styleable shouldn't probably do anything with presence because the child should expect to handle that, at least need to double check taht
+
+- transform issue:
+
+it looks like transform does not work - console is logging [moti]: Invalid transform value. Needs to be an array. but compiler errors on Types of property 'transform' are incompatible. Type '{ translateX: string; }[]' is not assignable to type 'Transform | undefined'.
+
+https://linear.app/uniswap/issue/WEB-4733/tamagui-transform-needs-array-to-work-but-type-expects-string
+
+- bug: if you name a file `polyfill-native.ts` tamagui-biuld doesnt output the .native files properly
+
+- When using <Adapt.Contents />  inside an Adapt when="sm"  it seems to hide the children before fully closed
+  - https://uniswapteam.slack.com/archives/C07AHFK2QRK/p1723409606028379
+
+- When opening a fit Sheet while keyboard is active (at least on ios) the height of the sheet is off
+  - https://uniswapteam.slack.com/archives/C07AHFK2QRK/p1723475036176189
+  
+- AnimatePresence leaving things in DOM
+  - https://uniswapteam.slack.com/archives/C07AHFK2QRK/p1723148309745679
+
+
+
+a way to set styles for children:
+
+```tsx
+// we could just use classnames?
+
+import { Style } from '@tamagui/core'
+
+const Text = styled(Text, {
+  className: 'button-item',
 })
 
-render(
-  <TamaguiProvider>
-    <FontLanguage default="en" body="en">
-    </FontLanuage>
-  </TamaguiProvider>
+const Icon = styled(Text, {
+  className: 'button-item',
+})
+
+const Button = withStaticProperties(ButtonFrame, {
+  Icon,
+  Text
+})
+
+const example = (
+  <Button gap="$4">
+    {/* prefer not renaming so compiler can optimize: */}
+    <Style selector=".button-item" color="$color10">
+      {/* all of these 👇 get the styles from ^ */}
+      <Button.Text /> 
+      <Button.Text />
+      <Button.Text />
+      <Button.Icon $button-hover={{}} />
+    </Style>
+  </Button>
 )
 ```
 
-  - button inverse doesn't update on theme change (site)
-  - need to fix safari -webkit-user-select
-  - `_active` style offical
-    - <SwitchTrack /> gets active theme by default when toggled
+---
 
-  - // TODO still have as const bug
-  - try using react-native-web $css object support for classnames
-  - add ui package setting custom types example in starter
-  - <Switch /> active state style
-  - <Sheet /> attach="bottom" os default
-    - <ActionSheet />
-  - <Select /> sheet version on small screen
-  - <Dialog /> sheet version on small screen
-  - <ContextMenu />
-  - <Menu /> somewhat like accordion with ListItems
-  - <Radio />
-  - <Checkbox />
-  - <Group> working with both
-  - <Select multi> (share logic with Grouped Radio/Checkbox)
-  - <Select><SearchInput /></Select>
-  - <Autocomplete />
-  - <Tabs /> ()
-  - <Accordion />
-  - <Icon /> can use theme values and size values  
-  - <Toast />
-  - <Form onSubmit /> 
-    - native works by attaching state to a FormContext
-    - web works by just listening for event and using FormData()
+v4 and beyond
 
-  - principles doc to explain:
-    - everything works runtime + compile the same
-    - designed for apps - so runtime performance key
-      - trades off bigger bundle size / a bit more init/memory
-  - Group make media style size use properly
-  - FAQ
-  - need an active theme thats blue in theme-base by default
-  - VisuallyHidden/display: none working with space
-  - // TODO shouldn't need tag="span" if buttoninbutton context works - test + in prod
-  - sell sizing story better - home hero, blog post?
-  - sell compiler much better in hero
-  - html props: role, tabIndex, input type
-  - <Input /> variant doesnt override paddingHorizontal set on same input
-  - make SimpleTooltip inverse by default
-    - make all inverse by default? i think so? or else make sub-themes handle it...
-  - POTENTIAL, i think rnw does support this its just trickier params, amy not want to do this:
-    - input type="email", button type="submit" etc
-      - its fine to wrap input in HOC like button
-      - normalize divergent android/ios:
-        - https://reactnative.dev/docs/textinput
-          - android accepts "autoComplete"
-          - ios accepts "textContentType"
-          - set secureTextEntry automatically for type="password"
-  - shorthands-only type/docs
-  - tokens-only type/docs
-  - validate Label with Select, Input, Switch etc all work with it
-  - test Android in starters repo
-  - if no enterStyle or exitStyle set with AnimatePresence, it doesn't exit
-  - <Spacer /> doesnt work w media query display none
-  - compiler work visually hidden
-  - maybe <UL /> <LI /> <OL />
-  - // TODO infer ref
+- flatMode - no nested objects, everything in flat props
+- plugins
 
-(potentially 1.0)
-  - super short classnames for themes in production
-  - Input based on Button for icon/iconAfter
-  - cache at variant level (?)
-  - another couple passes over style system to reduce work and size
-  - sizing.mdx - rationale on size/space 
-   - (size = height of button, 1 = smallest button, 10 = largest, 4 = natural, 6 = typical largest, 2 = typical smallest)
-  - ci should include a fake publish + reinstall step, because sometimes package.json.files[] is missing new files
-  - // native doesn't support until next react-native version, need to remove eventually
-  - <Tabs />
-    - needs RovingFocusGroup
-  - `blur` style prop
-  - `space` should work with media queries
-  - Text numberOfLines / context fix
-  - OmitShorthands<> + expandShorthands helper (latter exists already diff name...) (see ActiveCirlce in site)
-    - Docs/ability to configure stricted theme values (dont accept anything but tokens)
-  - add fonts section to guides
+---
 
-takeout:
-  - customizable createTheme()
-  - cli: 
-    - tamagui generate
-      - JSDocs / TSMorph
-    - tamagui serve
-      - able to focus in on any component without needing to restart anything
-      - localhost:3000/FuzzyComponentName
-    - tamagui test ./packages/site/components/OffsetBox.tsx
-    - tamagui debug ./packages/site/components/OffsetBox.tsx
-  - ios/android specific themes
-  - VSCode
-    - move from functional component to styled() and back
-    - built in jsx => css converter
-    - "move to my design system" (finds tamagui package.json and moves there)
-      - grab a selection of any styled() or functional component
-      - moves it into your design system
-      - updates index.ts there
-      - updates imports in app
-  - <Combobox /> (<SelectInput /> or <InputSelect />)
-  - <Scale />
-  - List hierarchical (https://developer.apple.com/documentation/swiftui/list)
+- Dialog => Sheet adapt performance
+  - see // TODO this will re-parent, ideally we would not change tree structure
 
-- ornaments system:
-    - hooks inside any styled component to add decoration-only elements
-      - for example to mimic iOS style ListItem you want a separator
-      - themes should ideally define this, right? 
-        - or themes can export decorations
+- SSR safe styled context, something like:
 
-so:
-
-```tsx
-import { ornaments, themes } from '@tamagui/theme-ios'
-
-export const createTamagui({
-  ornaments,
-  themes
+const Context = createStyledContext({
+  isVertical: {
+    $sm: true,
+    $gtSm: false,
+  },
 })
 
-// could enforce it only accepts TamaguiComponents:
-const ListItemSeparator = styled(Stack, {})
-const ornaments = {
-  ListItem: [ListItemSeparator],
+
+- Select is using focusScope which React.Children.only erroring in most usages
+  - we should try and redo FocusScope to not cloneElement at all and instead wrap with an element + display: contents
+
+---
+
+- Dialog.Portal and <Dialog modal /> redundant
+
+- as long as you use the nextjs or other new color scheme helpers they always add t_dark/t_light on first render so as long as youre ok with dark mode not working for js-off users, you could turn default the tamagui/config v4 to shouldAddPrefersColorThemes: false
+
+- lower priority uniswap:
+  - seems <Switch checked defaultChecked> isnt showing in the checked position
+  - <Theme name="dark"> with switch, the thumb is not picking up the right surface color, must be a multiple-nested theme issue
+
+- small win: `useTheme()` could take a theme name to use a diff theme than the current one
+
+- bug in useMedia + compiler
+  - https://app.graphite.dev/github/pr/Uniswap/universe/10626/fix-web-toast-alignment
+
+/theme
+
+- randomize button for palettes
+- OG image of theme card (use the tree one we used for the list of themes in studio)
+- save
+- use on bento
+
+- AnimatePresence refactor:
+  - https://x.com/mattgperry/status/1816842995758498017?s=46&t=5wFlU_OsfjJ0sQPMFbtG0A
+
+- className merging in variants!
+  - `positionSticky: { true: { className: 'position-sticky' } }`
+- opacity `/50`
+- AnimateList
+  - like AnimatePresence but for >1 items
+  - AnimatePresence keepMounted={} prop?
+  - can handle direction + let you control mount behavior
+
+- remove scroll not working when Dialog adapted to Sheet on mobile
+  - we may want Sheet to have its own removeScroll in this case
+
+- AnimatePresence should just work if you change the enterStyle exitStyle dynamically in the render, no need for custom we can capture the props
+
+- popover transform origin
+  - https://codesandbox.io/p/sandbox/floating-ui-react-scale-transform-origin-qv0t1c?file=%2Fsrc%2FApp.tsx%3A43%2C25
+- Setting default props for any style in a parent (variables dynamic / themes dynamic down the tree)
+
+- Popover click outside prop
+
+- data-disable-theme is being passed down on web snapshots
+- activeTheme props for all components
+- in dev mode if no checkbox indicator, warn
+  - checkbox should have a default indicator probably with a simple svg check we inline
+- move from useMedia match.addListener to addEventListener
+- media query height taking into account the "safe height" is important
+- https://linear.app/uniswap/issue/EXT-925/tamagui-error-breaking-the-extension
+- document Popover.Anchor
+- Sometimes press getting stuck still on uniswap moonpay flow
+- Text vertical align issue: https://github.com/Uniswap/universe/pull/6730
+
+- Popper arrow logic is bad, needs unstyled support and not to do weird shifting of sizes
+
+- No need for View + Text (just Element and we can extend it later)
+
+  - We'd need to mimic text inhertance on native (or remove it on web)
+  - https://github.com/facebook/react-strict-dom/blob/429e2fe1cb9370c59378d9ba1f4a40676bef7555/packages/react-strict-dom/src/native/modules/createStrictDOMComponent.js#L529
+
+- <Theme name="dark"> force below root dark causing hydration issues
+
+- Animation + shadowOffset is causing crash in iOS due to object value
+
+  - "auto" too
+
+- Adapt needs public API to support any adaptation
+
+- Select Virtualization
+
+- settings page in takeout SSR hydration issue due to useThemeSetting
+
+- animatedStyle showing up in animated component snapshot on native
+
+  - add some native snapshots in ci tests
+
+- addTheme updateTheme regression needs a test
+
+- type to search on Select regressed
+
+- // TODO: pulling past the limit breaks scroll on native, need to better make ScrollView
+
+- icons move from themed() to just styled()
+
+- native theme change warning logs + theme change speed
+
+- document popover hoverable + onOpenChange second arg via
+
+- add $mouse to takeout
+
+- compiler - no need to setup any separate package
+
+- Remove the need for Text
+
+- popovers work with no js
+
+- Select `ListItemFrame` area is messy/slow due to inline styles and complex components
+- propMode
+
+- make styled() only not accept most non-style props
+
+- Scale / ScaleSelect
+  should be a Menu with mini visualizations of the lum/sat scales for each
+
+- gradient style
+- "var" mode where it changes types of $ to var(--)
+- calc?
+
+- get takeout users studio access
+
+- studio color scales first class:
+
+  - adding a color/scale really adds a theme
+  - but also adds $colorName1 => $colorNameX to base theme
+
+- check usePropsAndStyle with group props
+
+- alt themes don't change color1-9 so you can't do color2 and then make the alt theme make it more subtle, but they should
+
+- disableClassName breaking css animation
+- css animateOnly should always force style tag styles
+
+- 2.0 make it just is the current state with fixes, unstyled across everything, and make various smaller breaking changes in api surfaces that need cleanup
+
+  - recommended config with more strict settings etc
+  - a few theme setups you can choose from
+
+- Takeout theme change needs a server restart / theme builder not re-building on changing colors.ts
+- Theme reset Button not changing
+- ZStack is abs positioning children...
+
+---
+
+Web:
+
+- createTamagui({ settings: { webMode: true } })
+- avoids console warning on Text
+- `@tamagui/style` separate from core
+- instead of validStyleProps use validNONStyleProps
+  - that way for web all style props pass through automatically
+  - also likely smaller bundle size (smart detect `onX`)
+- have a CSS mode
+- styled('div')
+- avoid flat style props + plugin for styled() control
+- beforeStyles + afterStyles array
+
+---
+
+`style`
+
+- enables Input taking { autofillSelectedStyle: Style }, or any component accepting a style object as a prop
+
+```tsx
+import { Stack, style } from '@tamagui/core'
+
+// make it so style props accepts either a regular style object
+// or something like this (can be exported from core):
+
+type StackStyle = {
+  base: ViewStyle
+  press?: ViewStyle
+  hover?: ViewStyle
+  focus?: ViewStyle
 }
 
-//  could make it accept platform specific object
-const ornaments = {
-  ListItem: {
-    ios: [ListItemSeparator],
-    web: []
-  },
+const mySubStyle: StackStyle = style({
+  backgroundColor: 'red', // optimizes on web to _bg-red
+
+  pressStyle: {
+    backgroundColor: 'blue', // optimizes on web to _press-bg-blue
+  }
+})
+
+const MyComponent = (props: { accentedStyle?: StackStyle }) => {
+  return (
+    <Stack style={[accentedStyle]} />
+  )
 }
+
+
 ```
 
-- next css shaker 
-  - loads every page after build and finds all unused styles, produces minimal css
+config: {
+  styleStrategy: { type: 'prop', prop: 'sx', acceptFlatStyles: true }
+}
+
+---
+
+Smaller features:
+
+- no-rerender psuedo styles on native when using reanimated driver (fernando PR)
+- imperative methods for many things - sheet, popover, etc, close etc
+- ssr safe themeInverse would be pretty nice
+- styled(ExternalComponent) should always allow Partial props
+  - but if you do provide the props ideally it should 'know' they are pre-filled and therefore not required anymore
+  - also it should make sure to make those props required if they aren't set in styled()
+- avoid css extract on server mode next.js?
+
+---
+
+Performance:
+
+- TAMAGUI_OPTIMIZE_NATIVE_VIEWS on by default using proper prop mapping
+- compiler can add `disableEvents` `disableTheme` to avoid hooks
+- optimization of useTheme/getSplitStyles seems like it has some decent stuff
+- could lazy expand styles
+- get dynamicEval working automatically
+- warn on styled(Pressable) and styled(TouchableOpacity)
+
+---
+
+CLI:
+
+- `tama upgrade` - official tamagui upgrade that works across bundlers
+- `tamagui [clone|eject] Sheet ./packages/sheet`
+  - clones the sheet package into your repo somewhere
+
+---
+
+Components:
+
+- Native
+
+  - Select
+    - iOS Select as well as the newer SwiftUI menu style Picker
+  - Sheet native android - https://github.com/intergalacticspacehighway/react-native-android-bottomsheet
+
+- Menu
+- DatePicker
+
+---
+
+# Backlog
+
+- Popover.Close inside Sheet
+
+- merge font-size and get-font-sized packages
+
+- cli needs a start update command just runs diff against your `~/.tamagui/tamagui`
+
+- sheet native iOS snapPoints
+
+  - pre release 2.0 version of library
+  - https://github.com/dominicstop/react-native-ios-modal/blob/wip/example/src/examples/Test09.tsx
+
+- CI not failing on type errors in code/tamagui.dev
+  a package.json etc etc + zip file
+
+- @alt Sheet inside Popover breaks css animation:
+
+  - https://tamagui.dev/docs/components/popover
+
+- Studio: drag and drop a font and you can configure the subset
+
+  - automatically converts to the right output formats
+  - auto generates CSS
+  - bundles it into
+
+- <Sheet native />
+  - https://github.com/dominicstop/react-native-ios-modal
+  - we'd want expo module + snap points
+
+- <ActionSheet />
+- plus `native` prop https://reactnative.dev/docs/actionsheetios
+
+- add test that builds site for prod + checks for header text / no errors
+
+- Switch unstyled - make it so it doesn't do any theme stuff
+
+- font weights in css are generating extra variables with "undefined" value if not filled in
+- add defaultSize and defaultFontFamily to createTamagui
+
+  - all instances of $true can become getConfig().defaultSize
+  - remove the validation in createTamagui that enforces the keys
+
+- bug: inputs rendering twice due to focusableInputHOC, if you remove that it doesn't, this is due to styled() + how it determines ComponentIn and grabs the component
+
+- getVariableValue(props.fontFamily) doesn't look right
+
+- prebuild option
+  - de-dupes css
+  - fixes next.js next load css
+  - simplifies initial setup and need for plugins
+- site snack + demo embed on all pages floating that scales up on hover on large screengrid or augment
+- pass Size down context (see Group) is this just Themes but for individual props (css variable direct support <Theme set={{ size: '$4' }}> ?)?
+- kitchen sink snack on site
+- @tamagui/tailwind
+- pass Size down context (see Group) but really this is just Themes but for individual props (css variable direct support <Theme set={{ size: '$4' }}> ?)
+- <ActionSheet />
+- check deps are matching in compiler startup
+- can optimize useMedia / many hooks:
+  - https://twitter.com/sebmarkbage/status/1576603375814070273
+- dual direction scrollview shouldn't need two nested see CodeDemoPreParsed
+- container queries
+- `variantsOnly: true` on styled(), removes types for anything but variants (and className/theme etc)
+- way to use tamagui with custom design system tokens
+  - basically map any tokens you choose to internal tamagui ones
+- input like button
+- allow string values alongside numbers (nativebase port)
+- media `$light` and `$dark` for overrides
+- built in jsx => css converter
+- `tag` => `as` (keep fallback around as deprecated)
+  - `as={['a', { ...props }]}`
+- breaking change notifier cli
+- VSCode => "turn JSX into styled()"
+- pass in SharedValue to any prop for animations
+- try using react-native-web $css object support for classnames
+- animation accept useAnimatedStyle
+- Switch gesture
+- <Icon />
+  - use theme values and size values
+  - can swap for other icon packs (use createTamagui({ icons }))
+- <Text fontSize="parent" />
+- <UL /> <LI /> <OL />
+- hoverStyle={{ [XStack]: {} }}
 - <List.Section /> see (https://developer.apple.com/documentation/swiftui/list Section)
-- compiler could insert special props like:
-  - __noAnimations, __noTheme, __noSpace
-  - it would change key={} alongside that
-  - that way HMR still works, but loads less hooks
-  - works in production for extra perf
-- as={} + extraction + types
-- <GradientText /> can work native with 
+- <GradientText /> can work native with
   - https://github.com/react-native-masked-view/masked-view
-- react-native-skia / svg image support
 - beforeStyle, afterStyle could work ...
   - only if we can do with pseudos:
     - focusStyle={{ after: { fullscreen: true, border... } }}
     - allows for proper focused borders that don't require super hacks
     - see Switch
-- styled(Button) types break   
-- <Avatar />
   - radio may be List.Radio just combines List, Label, Drawer
     - can use Switch or check or custom
-- <Accordion />
-- <Carousel />
-- load theme hook via feature if possible
-- styleq / react-native-web 18 exploration
-- <Video />, <Spinner />
-- instead of generating classname strings generate objects
-  - instead of concatClassNames then just object ...
-- fix memory leak causing OOM eventually on site
-- // this can be done with CSS entirely right?
-- optional 18-only separate releases? beta.3.react18?
-  - react native doesn't support it yet except on new arch
-  - (useId/useInsertionEffect)
-- escape hatch for html props `htmlProps` or tag={} => as={} + work better?
-- whenever switch over to styleq or own internal css generator:
-  - remove getStylesAtomic altogether - loop only once over props/styles
-- exported hooks - useControllableState, useLayout
-- <SizableFrame />, <EnsureFlexed />
-- document/release <ThemeReverse />
-- container queries
-- // TODO only on hoverable/pressable!
-- options to render to native components in more places
-- <Group />
-- transformOrigin
-  - may be able to translate to matrix https://www.jianshu.com/p/c67559b8f691
-  - https://github.com/sueLan/react-native-anchor-point
-- space => gap (blocked https://github.com/facebook/yoga/pull/1116)
-- Text selectColor
-- focusWithinStyle
-- accessibility upgrades (focus rings etc)
-- colored cli output
-- have tamagui watch the tamagui.config.ts file and report if types break
-- smart responsive scaling system (<Scale /> basically)
-- https://github.com/react-native-menu/menu
-- vscode plugin to highlight the current node your cursors inside of in dom
-- blur prop built in ?
-- // TODO fix any type
+- skeleton just using Theme / variables
 
+*Skeleton
 
-site optimize:
-  - burntsienna (loading from potentially 3 places)
-
-
-### Skeleton
-
-- I think we ultimately need a new prop for all tamagui components skeleton, if true it will render the component as-is, but add an overlay view (SkeletonOverlay) that covers it with some default style, plus should set various things like pointerevents and aria-disabled
-
-- skeleton prop can also accept any react element, so you can do <Button skeleton={<MyCustomSkeleton />} and maybe that even receives some special prop that gives info on the Button to skeleton
-
-- we can add a defaultSkeleton to createTamagui so you can control that out of the box (defaults to SkeletonOverlay)
-
-- been wanting to add this to tamagui since forever but its a good use case here: we can add a  new option defaultProps to createTamagui, so you can do defaultProps: { Button: { skeleton: <SomeSpecialOneJustForButton /> } } which may be useful for if certain components have different needs
-
-- may eventually want something like skeletonStyle which only applies to the parent component when skeleton is on, this probably is necessary so you can do things like overflow: hidden; position: relative when skeletons are on, so they fit inside nicely and shadows dont overlap
-
-- a nice wrapper component <Skeleton>{...components}</Skeleton> and it will force all children that support it to have a skeleton, but runs into trouble with fully flattened components... we'd have to limit them to only accept skeletonStyle and not a sub-component i believe, this is my biggest ? right now... maybe nice to limit skeleton to only be style props, because otherwise can get heavy.. 
-
-- when you have Suspense this is a bit weird, but you can do something like <Suspense fallback={<Skeleton><MyLoadingView load={false} /></Skeleton>}><MyLoadingView /></Skeleton>
-
-
-### Ornaments
-
-- <Button ornaments={[MyStyledOverlay]} />
-
-- they must be a plain styled() view, can't be a functional component that ensures we can extract them fully
-
-- this means they can be compiled away fully and limits weirdness, we're not trying to make some new react API inside react, just add a way to decorate things with themes
-
-- one great example of their use case is Skeleton, but another is more complex themes (see the attached screenshot). right now you can't really replicate that without making a very complex component with lots of sub-components, and it sort of breaks everything you like about styled() and compilation etc etc. And ideally you'd want to be able to make a component like that  entirely through themes.... 
-
-- make themes support ornaments... since we already have component-specificity with themes, you'd get some crazy ability: dark_Button could add a few ornaments and make that entire 8bit looking button (and it would swap out entirely on changing theme). if we get pseudos working as well, then dark_Button could have ornamentsFocus and ornamentsHover and we'd get that cool effect in the screenshot where you have little edges on each corner
-
-- i think for v1 too no media queries or pseudo states though, but we could add those eventually it just requires more logic/compilation
-
-- i think this solves somewhat the skeleton stuff in a few ways in that Skeleton can be a special ornament thats applied, and also it would be two parts: Skeleton.Frame and Skeleton.Shine. if animations work (this part is tricky as at least for web we'd only be able to support CSS)
-
+```tsx
+const Skeleton = styled(Stack, {
+  animation: {
+    name: 'quick',
+    loop: true
+  },
+  enterStyle: {
+    x: '100%',
+  },
+  exitStyle: {
+    x: '-100%',
+  },
+  background: `linear-gradient(to left, $background, $color, $background)`,
+})
+```
